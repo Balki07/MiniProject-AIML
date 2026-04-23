@@ -1,0 +1,17 @@
+# Root-level ignores
+node_modules/
+.env
+*.log
+.DS_Store
+Thumbs.db
+
+# Uploads (user-generated content — never commit)
+backend/uploads/
+
+# Build outputs
+frontend/dist/
+frontend/build/
+
+# OS
+.DS_Store
+desktop.ini

@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  body {
+    @apply bg-[#0a0a0f] text-white font-sans antialiased;
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl;
+  }
+  .btn-primary {
+    @apply bg-brand-500 hover:bg-brand-600 text-white font-semibold px-6 py-2.5 rounded-xl
+           transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply bg-white/10 hover:bg-white/20 text-white font-semibold px-6 py-2.5 rounded-xl
+           border border-white/20 transition-all duration-200 active:scale-95;
+  }
+  .btn-danger {
+    @apply bg-red-500/20 hover:bg-red-500/30 text-red-400 font-semibold px-4 py-2 rounded-xl
+           border border-red-500/30 transition-all duration-200;
+  }
+  .input-field {
+    @apply w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 text-white
+           placeholder-white/30 focus:outline-none focus:border-brand-500 focus:ring-1
+           focus:ring-brand-500/50 transition-all duration-200;
+  }
+  .trust-badge-high   { @apply bg-trust-high/20 text-trust-high border border-trust-high/30; }
+  .trust-badge-medium { @apply bg-trust-medium/20 text-trust-medium border border-trust-medium/30; }
+  .trust-badge-low    { @apply bg-trust-low/20 text-trust-low border border-trust-low/30; }
+  .status-pending  { @apply bg-amber-500/20 text-amber-400 border border-amber-500/30; }
+  .status-approved { @apply bg-emerald-500/20 text-emerald-400 border border-emerald-500/30; }
+  .status-rejected { @apply bg-red-500/20 text-red-400 border border-red-500/30; }
+  .status-flagged  { @apply bg-orange-500/20 text-orange-400 border border-orange-500/30; }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0a0a0f; }
+::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 3px; }

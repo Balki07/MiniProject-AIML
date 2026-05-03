@@ -92,22 +92,10 @@ const evaluate = (ad, user) => {
   score = Math.max(0, Math.min(100, score));
 
   // ── STEP 5: Decision ─────────────────────────────────────────────────────
-  let status;
+  // All ads now go to pending for manual admin review, regardless of score.
+  let status = 'pending';
   let autoProcessed = false;
   let rejectionReason = null;
-
-  if (score >= 80) {
-    status = 'approved';
-    autoProcessed = true;
-  } else if (score < 50) {
-    status = 'rejected';
-    autoProcessed = true;
-    rejectionReason = flags.length
-      ? flags.join('; ')
-      : 'Content did not meet trust threshold';
-  } else {
-    status = 'pending'; // send to admin review
-  }
 
   return {
     trust_score: score,

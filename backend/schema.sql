@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS advertisements (
                           CHECK (status IN ('pending','approved','rejected','flagged','removed')),
   trust_score          INT         DEFAULT 0 CHECK (trust_score BETWEEN 0 AND 100),
   auto_processed       BOOLEAN     DEFAULT FALSE,
+  admin_message        TEXT,
   rejection_reason     TEXT,
 
   -- Revenue / Featured
@@ -75,6 +76,37 @@ CREATE TABLE IF NOT EXISTS ad_events (
   created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- ─── DEPARTMENT PAGE LAYOUTS (Admin Drag & Drop Builder) ──────────────────
+CREATE TABLE IF NOT EXISTS departments (
+  slug        VARCHAR(50) PRIMARY KEY,
+  name        VARCHAR(100) NOT NULL,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS department_layouts (
+  id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  department_slug  VARCHAR(50) REFERENCES departments(slug) ON DELETE CASCADE,
+  status           VARCHAR(20) NOT NULL CHECK (status IN ('draft', 'published')),
+  created_by       UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_at       TIMESTAMPTZ DEFAULT NOW(),
+  updated_at       TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE (department_slug, status)
+);
+
+CREATE TABLE IF NOT EXISTS department_layout_items (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  layout_id     UUID REFERENCES department_layouts(id) ON DELETE CASCADE,
+  ad_id         UUID REFERENCES advertisements(id) ON DELETE CASCADE,
+  x             INT NOT NULL DEFAULT 0,
+  y             INT NOT NULL DEFAULT 0,
+  width         INT NOT NULL DEFAULT 260,
+  height        INT NOT NULL DEFAULT 180,
+  z_index       INT NOT NULL DEFAULT 1,
+  is_visible    BOOLEAN DEFAULT TRUE,
+  created_at    TIMESTAMPTZ DEFAULT NOW(),
+  updated_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ─── INDEXES ─────────────────────────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_ads_status      ON advertisements(status);
 CREATE INDEX IF NOT EXISTS idx_ads_trust       ON advertisements(trust_score DESC);
@@ -82,6 +114,8 @@ CREATE INDEX IF NOT EXISTS idx_ads_user        ON advertisements(user_id);
 CREATE INDEX IF NOT EXISTS idx_ads_featured    ON advertisements(is_featured) WHERE is_featured = TRUE;
 CREATE INDEX IF NOT EXISTS idx_reports_ad      ON reports(ad_id);
 CREATE INDEX IF NOT EXISTS idx_events_ad       ON ad_events(ad_id);
+CREATE INDEX IF NOT EXISTS idx_layout_items_layout ON department_layout_items(layout_id);
+CREATE INDEX IF NOT EXISTS idx_layout_items_ad     ON department_layout_items(ad_id);
 
 -- ─── SEED: Default Admin Account ─────────────────────────────────────────────
 -- Password: Admin@123456 (bcrypt hash — change in production!)
@@ -94,3 +128,16 @@ VALUES (
   TRUE,
   100
 ) ON CONFLICT (email) DO NOTHING;
+
+-- ─── SEED: Department Pages ─────────────────────────────────────────────────
+INSERT INTO departments (slug, name) VALUES
+  ('dashboard', 'Dashboard'),
+  ('food', 'Food'),
+  ('tech', 'Tech'),
+  ('jobs', 'Jobs'),
+  ('services', 'Services'),
+  ('business', 'Business'),
+  ('events', 'Events'),
+  ('real-estate', 'Real Estate'),
+  ('other', 'Other')
+ON CONFLICT (slug) DO NOTHING;

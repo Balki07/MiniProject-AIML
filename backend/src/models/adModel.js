@@ -76,12 +76,12 @@ const adModel = {
   },
 
   /** Update ad status (admin moderation) */
-  async updateStatus(id, { status, rejectionReason }) {
+  async updateStatus(id, { status, adminMessage }) {
     const res = await query(
       `UPDATE advertisements
-         SET status=$1, rejection_reason=$2, updated_at=NOW()
+         SET status=$1, admin_message=$2, updated_at=NOW()
        WHERE id=$3 RETURNING *`,
-      [status, rejectionReason || null, id]
+      [status, adminMessage || null, id]
     );
     return res.rows[0];
   },
@@ -125,6 +125,28 @@ const adModel = {
        FROM advertisements`
     );
     return res.rows[0];
+  },
+
+  /** User: edit rejected ad and resubmit to pending moderation */
+  async updateRejectedByOwner(id, userId, { title, description, category, location, imageUrl, trustScore }) {
+    const res = await query(
+      `UPDATE advertisements
+         SET title=$1,
+             description=$2,
+             category=$3,
+             location=$4,
+             image_url=$5,
+             trust_score=$6,
+             status='pending',
+             auto_processed=FALSE,
+             rejection_reason=NULL,
+             admin_message=NULL,
+             updated_at=NOW()
+       WHERE id=$7 AND user_id=$8
+       RETURNING *`,
+      [title, description, category, location || null, imageUrl || null, trustScore, id, userId]
+    );
+    return res.rows[0] || null;
   },
 };
 

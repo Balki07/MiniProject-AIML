@@ -15,13 +15,26 @@ const reportRoutes = require('./routes/report.routes');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ── Security ──────────────────────────────────────────────────────────────────
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' }, // allow images via frontend
 }));
 
+const allowedOrigins = process.env.CLIENT_URL
+  ? process.env.CLIENT_URL.split(',').map((origin) => origin.trim()).filter(Boolean)
+  : ['http://localhost:5173', 'http://localhost:5174'];
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    // Allow non-browser clients (curl, server-to-server, tests).
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+
+    // Dev convenience: allow localhost on any port for Vite/preview instances.
+    if (/^http:\/\/localhost:\d+$/.test(origin)) return callback(null, true);
+
+    return callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
   credentials: true,
 }));
 
@@ -44,6 +57,9 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 // ── Static files (uploaded images) ────────────────────────────────────────────
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+// ── Static files (PDF reports) ────────────────────────────────────────────────
+app.use('/reports', express.static(path.join(__dirname, '../reports')));
 
 // ── API Routes ────────────────────────────────────────────────────────────────
 app.use('/api/auth',    authRoutes);

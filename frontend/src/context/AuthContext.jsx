@@ -3,19 +3,29 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import api from '../services/api';
 
 const AuthContext = createContext(null);
+const isLocalhost = typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname);
+
+const getTokenStorage = () => (isLocalhost ? window.sessionStorage : window.localStorage);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const loadUser = useCallback(async () => {
-    const token = localStorage.getItem('token');
+    const tokenStorage = getTokenStorage();
+    if (isLocalhost) {
+      window.localStorage.removeItem('token');
+    }
+
+    const token = tokenStorage.getItem('token');
     if (!token) { setLoading(false); return; }
+
     try {
       const { data } = await api.get('/auth/me');
       setUser(data.user);
     } catch {
-      localStorage.removeItem('token');
+      window.localStorage.removeItem('token');
+      window.sessionStorage.removeItem('token');
       setUser(null);
     } finally {
       setLoading(false);
@@ -25,17 +35,28 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => { loadUser(); }, [loadUser]);
 
   const login = ({ user, token }) => {
-    localStorage.setItem('token', token);
+    const tokenStorage = getTokenStorage();
+    tokenStorage.setItem('token', token);
+    if (tokenStorage === window.localStorage) {
+      window.sessionStorage.removeItem('token');
+    } else {
+      window.localStorage.removeItem('token');
+    }
     setUser(user);
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    window.localStorage.removeItem('token');
+    window.sessionStorage.removeItem('token');
     setUser(null);
   };
 
+  const updateUser = (updatedUser) => {
+    setUser(updatedUser);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, isAdmin: user?.role === 'admin' }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, updateUser, isAdmin: user?.role === 'admin' }}>
       {children}
     </AuthContext.Provider>
   );

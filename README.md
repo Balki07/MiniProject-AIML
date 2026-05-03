@@ -111,6 +111,13 @@ DATABASE_URL=postgresql://user:password@host/dbname?sslmode=require
 JWT_SECRET=your_long_random_secret_here
 PORT=5000
 CLIENT_URL=http://localhost:5173
+
+# Optional: moderation email notifications
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=you@example.com
+SMTP_PASS=your_app_password
+SENDER_EMAIL=Advertisement Express <no-reply@example.com>
 ```
 
 ### 4. Install & start the backend
@@ -124,9 +131,15 @@ npm run dev
 ### 5. Install & start the frontend
 ```bash
 cd frontend
+cp .env.example .env
 npm install
 npm run dev
 # ✅ App running at http://localhost:5173
+```
+
+Frontend `.env` values:
+```env
+VITE_API_URL=http://localhost:5000/api
 ```
 
 ---

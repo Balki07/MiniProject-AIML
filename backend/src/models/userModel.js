@@ -11,7 +11,7 @@ const userModel = {
   /** Find user by ID (safe — no password) */
   async findById(id) {
     const res = await query(
-      'SELECT id, name, email, phone, role, is_verified, trust_level, ad_count, approved_count, created_at FROM users WHERE id = $1',
+      'SELECT id, name, email, phone, company, address, bio, role, is_verified, trust_level, ad_count, approved_count, created_at FROM users WHERE id = $1',
       [id]
     );
     return res.rows[0] || null;
@@ -21,18 +21,18 @@ const userModel = {
   async create({ name, email, phone, passwordHash }) {
     const res = await query(
       `INSERT INTO users (name, email, phone, password_hash)
-       VALUES ($1, $2, $3, $4) RETURNING id, name, email, phone, role, is_verified, trust_level, created_at`,
+       VALUES ($1, $2, $3, $4) RETURNING id, name, email, phone, company, address, bio, role, is_verified, trust_level, created_at`,
       [name, email, phone || null, passwordHash]
     );
     return res.rows[0];
   },
 
   /** Update profile fields */
-  async updateProfile(id, { name, phone }) {
+  async updateProfile(id, { name, phone, company, address, bio }) {
     const res = await query(
-      `UPDATE users SET name=$1, phone=$2, updated_at=NOW() WHERE id=$3
-       RETURNING id, name, email, phone, role, is_verified, trust_level`,
-      [name, phone, id]
+      `UPDATE users SET name=$1, phone=$2, company=$3, address=$4, bio=$5, updated_at=NOW() WHERE id=$6
+       RETURNING id, name, email, phone, company, address, bio, role, is_verified, trust_level`,
+      [name, phone, company, address, bio, id]
     );
     return res.rows[0];
   },

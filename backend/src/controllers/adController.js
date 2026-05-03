@@ -3,6 +3,7 @@ const { validationResult } = require('express-validator');
 const adModel = require('../models/adModel');
 const adEventModel = require('../models/adEventModel');
 const userModel = require('../models/userModel');
+const layoutModel = require('../models/layoutModel');
 const verificationEngine = require('../services/verificationEngine');
 const trustService = require('../services/trustService');
 const path = require('path');
@@ -134,6 +135,72 @@ const trackClick = async (req, res) => {
   }
 };
 
+/** PUT /api/ads/:id — Owner can edit rejected ad and resubmit */
+const updateRejectedAd = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { title, description, category, location } = req.body;
+
+  try {
+    const ad = await adModel.findById(req.params.id);
+    if (!ad) return res.status(404).json({ error: 'Ad not found.' });
+    if (ad.user_id !== req.user.id) return res.status(403).json({ error: 'Not allowed to edit this ad.' });
+    if (ad.status !== 'rejected') {
+      return res.status(400).json({ error: 'Only rejected ads can be modified and resubmitted.' });
+    }
+
+    const imageUrl = req.file ? `/uploads/ads/${req.file.filename}` : ad.image_url;
+
+    const result = verificationEngine.evaluate(
+      { title, description, category, location, imageUrl },
+      req.user
+    );
+
+    const updatedAd = await adModel.updateRejectedByOwner(req.params.id, req.user.id, {
+      title,
+      description,
+      category,
+      location,
+      imageUrl,
+      trustScore: result.trust_score,
+    });
+
+    if (!updatedAd) return res.status(404).json({ error: 'Ad not found.' });
+
+    await trustService.recalculate(req.user.id);
+
+    return res.json({
+      ad: updatedAd,
+      verification: {
+        trust_score: result.trust_score,
+        status: updatedAd.status,
+        auto_processed: false,
+        message: getStatusMessage(updatedAd.status, false),
+      },
+      message: 'Ad updated and resubmitted for admin review.',
+    });
+  } catch (err) {
+    console.error('Update rejected ad error:', err);
+    return res.status(500).json({ error: 'Failed to update and resubmit ad.' });
+  }
+};
+
+/** GET /api/ads/layout/:departmentSlug — Public published department page layout */
+const getDepartmentLayout = async (req, res) => {
+  try {
+    const data = await layoutModel.getPublishedLayoutForPublic({
+      departmentSlug: req.params.departmentSlug,
+    });
+    return res.json(data);
+  } catch (err) {
+    console.error('Get department layout error:', err);
+    return res.status(500).json({ error: 'Failed to load department layout.' });
+  }
+};
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const getStatusMessage = (status, autoProcessed) => {
   if (status === 'approved' && autoProcessed) return '🎉 Your ad has been automatically approved and is now live!';
@@ -141,4 +208,4 @@ const getStatusMessage = (status, autoProcessed) => {
   return '⏳ Your ad is under review. An admin will approve it shortly.';
 };
 
-module.exports = { createAd, getFeed, getMyAds, getAdById, trackClick };
+module.exports = { createAd, getFeed, getMyAds, getAdById, trackClick, updateRejectedAd, getDepartmentLayout };

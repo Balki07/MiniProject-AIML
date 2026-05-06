@@ -73,6 +73,9 @@ const moderateAd = async (req, res) => {
         adTitle: ad.title,
         status,
         adminMessage: admin_message || null,
+        trustScore: ad.trust_score,
+        category: ad.category,
+        location: ad.location,
       }).catch((emailErr) => {
         console.error('Moderation email error:', emailErr.message);
       });

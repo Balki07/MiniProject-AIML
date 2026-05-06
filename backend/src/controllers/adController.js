@@ -6,6 +6,7 @@ const userModel = require('../models/userModel');
 const layoutModel = require('../models/layoutModel');
 const verificationEngine = require('../services/verificationEngine');
 const trustService = require('../services/trustService');
+const { sendSubmissionConfirmation } = require('../services/emailService');
 const path = require('path');
 
 /** POST /api/ads — Submit a new advertisement */
@@ -50,6 +51,18 @@ const createAd = async (req, res) => {
 
     // Recalculate user trust level after ad submission
     await trustService.recalculate(user.id);
+
+    // Send submission confirmation email (non-blocking)
+    sendSubmissionConfirmation({
+      to: user.email,
+      userName: user.name,
+      adTitle: title,
+      category,
+      location,
+      trustScore: result.trust_score,
+    }).catch((err) => {
+      console.error('[Email] Submission email failed:', err.message);
+    });
 
     return res.status(201).json({
       ad,

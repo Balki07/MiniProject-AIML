@@ -19,6 +19,7 @@ const AdminAdHistoryPage = lazy(() => import('./pages/AdminAdHistoryPage'));
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage'));
 const DepartmentBoardPage = lazy(() => import('./pages/DepartmentBoardPage'));
 const AdDetailsPage = lazy(() => import('./pages/AdDetailsPage'));
+const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'));
 
 const App = () => (
   <LanguageProvider>
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/department/:slug" element={<Navigate to="/dashboard" replace />} />
             <Route path="/login"     element={<LoginPage />} />
             <Route path="/register"  element={<RegisterPage />} />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
 
             <Route path="/dashboard" element={<DepartmentBoardPage defaultSlug="dashboard" />} />
             <Route path="/profile"   element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />

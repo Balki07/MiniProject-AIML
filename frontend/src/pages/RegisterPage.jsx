@@ -7,6 +7,7 @@ import { useLanguage } from '../context/LanguageContext';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 import { Zap } from 'lucide-react';
+import GoogleSignInButton from '../components/GoogleSignInButton';
 
 const RegisterPage = () => {
   const [form, setForm] = useState({ name: '', email: '', phone: '', password: '' });
@@ -20,9 +21,11 @@ const RegisterPage = () => {
     setLoading(true);
     try {
       const { data } = await api.post('/auth/register', form);
-      login(data);
-      toast.success(t('register.toast.created'));
-      navigate('/profile');
+      // Registration successful — user must verify email before getting a JWT
+      if (data.requiresVerification) {
+        toast.success('Account created! Check your email for the verification code.');
+        navigate(`/verify-email?email=${encodeURIComponent(form.email)}`);
+      }
     } catch (err) {
       const msg = err.response?.data?.error || err.response?.data?.errors?.[0]?.msg || t('register.toast.failed');
       toast.error(msg);
@@ -71,7 +74,17 @@ const RegisterPage = () => {
             </button>
           </form>
 
-          <p className="text-center text-white/40 text-sm mt-6">
+          {/* Divider */}
+          <div className="flex items-center gap-3 my-5">
+            <div className="flex-1 h-px bg-white/10" />
+            <span className="text-white/30 text-xs font-medium uppercase tracking-wider">or</span>
+            <div className="flex-1 h-px bg-white/10" />
+          </div>
+
+          {/* Google Sign-In */}
+          <GoogleSignInButton label="Sign up with Google" />
+
+          <p className="text-center text-white/40 text-sm mt-5">
             {t('register.haveAccount')}{' '}
             <Link to="/login" className="text-brand-400 hover:text-brand-300 font-semibold">{t('register.signIn')}</Link>
           </p>

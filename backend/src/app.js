@@ -1,4 +1,3 @@
-// src/app.js — Express application entry point
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -16,7 +15,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(helmet({
-  crossOriginResourcePolicy: { policy: 'cross-origin' }, // allow images via frontend
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
 }));
 
 const allowedOrigins = process.env.CLIENT_URL

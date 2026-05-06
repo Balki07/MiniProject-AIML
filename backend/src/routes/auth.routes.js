@@ -1,7 +1,7 @@
 // src/routes/auth.routes.js
 const express = require('express');
 const { body } = require('express-validator');
-const { register, login, me } = require('../controllers/authController');
+const { register, login, me, verifyOtp, resendOtp, googleAuth } = require('../controllers/authController');
 const { protect } = require('../middleware/auth.middleware');
 
 const router = express.Router();
@@ -19,6 +19,19 @@ router.post('/login', [
   body('email').isEmail().normalizeEmail(),
   body('password').notEmpty().withMessage('Password required'),
 ], login);
+
+router.post('/verify-otp', [
+  body('email').isEmail().normalizeEmail().withMessage('Valid email required'),
+  body('otp').isLength({ min: 6, max: 6 }).withMessage('OTP must be 6 digits').isNumeric(),
+], verifyOtp);
+
+router.post('/resend-otp', [
+  body('email').isEmail().normalizeEmail().withMessage('Valid email required'),
+], resendOtp);
+
+router.post('/google', [
+  body('credential').notEmpty().withMessage('Google credential is required'),
+], googleAuth);
 
 router.get('/me', protect, me);
 

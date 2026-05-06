@@ -7,6 +7,7 @@ import { useLanguage } from '../context/LanguageContext';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 import { Zap, Eye, EyeOff } from 'lucide-react';
+import GoogleSignInButton from '../components/GoogleSignInButton';
 
 const LoginPage = () => {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -25,7 +26,14 @@ const LoginPage = () => {
       toast.success(t('login.toast.welcomeBack', { name: data.user.name }));
       navigate(data.user.role === 'admin' ? '/admin' : '/dashboard');
     } catch (err) {
-      toast.error(err.response?.data?.error || t('login.toast.failed'));
+      const errData = err.response?.data;
+      // Backend signals the user needs to verify email first
+      if (errData?.requiresVerification) {
+        toast('Please verify your email first. A new code has been sent.', { icon: '📧' });
+        navigate(`/verify-email?email=${encodeURIComponent(errData.email || form.email)}`);
+        return;
+      }
+      toast.error(errData?.error || t('login.toast.failed'));
     } finally {
       setLoading(false);
     }
@@ -87,7 +95,17 @@ const LoginPage = () => {
             </button>
           </form>
 
-          <p className="text-center text-white/40 text-sm mt-6">
+          {/* Divider */}
+          <div className="flex items-center gap-3 my-5">
+            <div className="flex-1 h-px bg-white/10" />
+            <span className="text-white/30 text-xs font-medium uppercase tracking-wider">or</span>
+            <div className="flex-1 h-px bg-white/10" />
+          </div>
+
+          {/* Google Sign-In */}
+          <GoogleSignInButton label="Continue with Google" />
+
+          <p className="text-center text-white/40 text-sm mt-5">
             {t('login.noAccount')}{' '}
             <Link to="/register" className="text-brand-400 hover:text-brand-300 font-semibold">{t('login.createOne')}</Link>
           </p>

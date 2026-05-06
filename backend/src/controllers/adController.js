@@ -18,7 +18,7 @@ const createAd = async (req, res) => {
 
   const { title, description, category, location } = req.body;
   const imageUrl = req.file
-    ? `/uploads/ads/${req.file.filename}`
+    ? req.file.path // Cloudinary URL
     : null;
 
   try {

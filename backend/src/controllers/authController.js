@@ -257,8 +257,11 @@ const googleAuth = async (req, res) => {
       message: isNewUser ? 'Account created via Google!' : 'Signed in with Google.',
     });
   } catch (err) {
-    console.error('Google auth error:', err.message);
-    return res.status(401).json({ error: 'Invalid Google credential. Please try again.' });
+    console.error('[Google Auth] verifyIdToken failed:', err.message, err.stack);
+    return res.status(401).json({
+      error: 'Invalid Google credential. Please try again.',
+      debug: process.env.NODE_ENV !== 'production' ? err.message : undefined,
+    });
   }
 };
 

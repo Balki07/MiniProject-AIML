@@ -42,8 +42,8 @@ const GoogleSignInButton = ({ label = 'Continue with Google' }) => {
       login(data);
 
       if (data.isNewUser) {
-        toast.success('Account created with Google! Complete your profile to post ads.');
-        navigate('/profile');
+        toast.success(`Welcome, ${data.user.name}! 🎉 Complete your profile to post ads.`);
+        navigate('/profile?google=new');
       } else {
         toast.success(`Welcome back, ${data.user.name}! 👋`);
         navigate(data.user.role === 'admin' ? '/admin' : '/dashboard');

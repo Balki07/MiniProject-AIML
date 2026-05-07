@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useSearchParams } from 'react-router-dom';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 import { User, Phone, Briefcase, MapPin, FileText, CheckCircle, AlertCircle, Mail, PhoneCall, MapPinned } from 'lucide-react';
@@ -9,6 +10,8 @@ import { User, Phone, Briefcase, MapPin, FileText, CheckCircle, AlertCircle, Mai
 const ProfilePage = () => {
   const { user, updateUser } = useAuth();
   const { t } = useLanguage();
+  const [searchParams] = useSearchParams();
+  const isNewGoogleUser = searchParams.get('google') === 'new';
   const [form, setForm] = useState({
     name: '',
     phone: '',
@@ -62,6 +65,36 @@ const ProfilePage = () => {
             <h1 className="text-4xl font-black text-white mb-2">{t('profile.pageTitle')}</h1>
             <p className="text-white/50">{t('profile.pageSubtitle')}</p>
           </div>
+
+          {/* Google Welcome Banner */}
+          {isNewGoogleUser && user && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="mb-6 rounded-2xl p-5 border border-blue-400/30 bg-blue-500/10 backdrop-blur-sm"
+            >
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shrink-0 mt-0.5">
+                  <svg viewBox="0 0 48 48" width="22" height="22">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="text-blue-300 font-bold text-base mb-1">Welcome, {user.name}! 🎉 You signed in with Google.</p>
+                  <p className="text-white/60 text-sm mb-3">Your name and email (<span className="text-white/80 font-medium">{user.email}</span>) are already filled in from your Google account. Please complete the remaining fields below to start posting ads.</p>
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    <span className="px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">✓ Name from Google</span>
+                    <span className="px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">✓ Email from Google</span>
+                    <span className="px-2 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">⚠ Phone needed</span>
+                    <span className="px-2 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">⚠ Company needed</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
 
           <div className="support-card rounded-3xl p-5 mb-8">
             <div className="mb-4">

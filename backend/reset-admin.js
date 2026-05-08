@@ -1,15 +1,15 @@
 // Script to reset admin account with correct password hash
 const bcrypt = require('bcryptjs');
 const { Pool } = require('pg');
+require('dotenv').config();
+
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL environment variable is not set. Please check your .env file.');
+}
 
 const pool = new Pool({
-  host: '34.206.177.121',
-  port: 5432,
-  database: 'neondb',
-  user: 'neondb_owner',
-  password: 'npg_P1oDcGqx6BOk',
+  connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false },
-  options: 'endpoint=ep-sweet-firefly-am61rekg',
 });
 
 async function resetAdmin() {

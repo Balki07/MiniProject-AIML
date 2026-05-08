@@ -1,6 +1,6 @@
 -- ============================================================
 --  Advertisement Express — PostgreSQL Schema
---  Run this on Neon.tech via their SQL editor
+--  Run this on your Supabase SQL editor (Database → SQL Editor)
 -- ============================================================
 
 -- Enable UUID support
@@ -12,12 +12,19 @@ CREATE TABLE IF NOT EXISTS users (
   name            VARCHAR(100) NOT NULL,
   email           VARCHAR(255) UNIQUE NOT NULL,
   phone           VARCHAR(20),
-  password_hash   TEXT        NOT NULL,
+  password_hash   TEXT,
   role            VARCHAR(10) DEFAULT 'user' CHECK (role IN ('user', 'admin')),
   is_verified     BOOLEAN     DEFAULT FALSE,        -- admin can manually verify
   trust_level     INT         DEFAULT 50 CHECK (trust_level BETWEEN 0 AND 100),
   ad_count        INT         DEFAULT 0,
   approved_count  INT         DEFAULT 0,
+  email_verified  BOOLEAN     DEFAULT FALSE,
+  email_verification_token VARCHAR(6),
+  email_verification_expires TIMESTAMPTZ,
+  google_id       VARCHAR(255) UNIQUE,
+  company         VARCHAR(255),
+  address         TEXT,
+  bio             TEXT,
   created_at      TIMESTAMPTZ DEFAULT NOW(),
   updated_at      TIMESTAMPTZ DEFAULT NOW()
 );

@@ -28,7 +28,7 @@ Advertisement Express is a full-stack web application where **only verified and 
 |---|---|
 | **Frontend** | React 18 + Vite, Tailwind CSS, Framer Motion |
 | **Backend** | Node.js, Express.js (MVC pattern) |
-| **Database** | PostgreSQL via [Neon.tech](https://neon.tech) (serverless) |
+| **Database** | PostgreSQL via [Supabase](https://supabase.com) (serverless) |
 | **Auth** | JWT (JSON Web Tokens) + bcrypt |
 | **File Upload** | Multer (local disk → Cloudinary-ready) |
 | **UI Icons** | Lucide React |
@@ -87,7 +87,7 @@ Base Score: 50
 
 ### Prerequisites
 - Node.js ≥ 18
-- A free [Neon.tech](https://neon.tech) PostgreSQL database
+- A free [Supabase](https://supabase.com) PostgreSQL database
 
 ### 1. Clone the repository
 ```bash
@@ -96,9 +96,9 @@ cd advertisement-express
 ```
 
 ### 2. Set up the database
-1. Sign up at [neon.tech](https://neon.tech) and create a project
-2. Open the **SQL Editor** and run the full contents of `backend/schema.sql`
-3. Copy your connection string from **Connection Details → Node.js**
+1. Sign up at [supabase.com](https://supabase.com) and create a new project
+2. Go to **SQL Editor** and create a new query, then paste the full contents of `backend/schema.sql` and execute
+3. Copy your connection string from **Project Settings → Database → Connection String** (use the URI under "Connection pooling" or "Direct connection")
 
 ### 3. Configure the backend
 ```bash
@@ -107,7 +107,7 @@ cp .env.example .env
 ```
 Edit `.env` and fill in:
 ```env
-DATABASE_URL=postgresql://user:password@host/dbname?sslmode=require
+DATABASE_URL=postgresql://postgres:your_password@your-project.supabase.co:5432/postgres
 JWT_SECRET=your_long_random_secret_here
 PORT=5000
 CLIENT_URL=http://localhost:5173

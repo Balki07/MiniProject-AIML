@@ -32,6 +32,9 @@ app.use(cors({
     // Dev convenience: allow localhost on any port for Vite/preview instances.
     if (/^http:\/\/localhost:\d+$/.test(origin)) return callback(null, true);
 
+    // Vercel convenience: allow any vercel preview domains to prevent CORS errors during testing
+    if (origin.endsWith('.vercel.app')) return callback(null, true);
+
     return callback(new Error(`CORS blocked for origin: ${origin}`));
   },
   credentials: true,
